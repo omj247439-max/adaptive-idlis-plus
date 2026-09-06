@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a0713">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HisaabBox — every calculator you need, in one place</title>
+<meta name="description" content="Finance, creator earnings, student, health and daily-life calculators, organized by category. Free, fast, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0713;
+    --panel:rgba(28,18,46,0.55);
+    --panel-solid:#170f26;
+    --panel-2:rgba(38,24,60,0.6);
+    --ink:#f5f0ff;
+    --ink-dim:#b6a6d9;
+    --ink-faint:#7c6a9c;
+    --line:rgba(216,180,255,0.14);
+    --line-strong:rgba(216,180,255,0.30);
+    --violet:#a855f7;
+    --violet-2:#7c3aed;
+    --violet-bright:#cf9bff;
+    --glow:rgba(168,85,247,0.55);
+    --glow-soft:rgba(168,85,247,0.25);
+    --radius:20px;
+    --radius-sm:13px;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box;}
+  html{color-scheme:dark;}
+  body{
+    margin:0;color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background:var(--bg);
+    background-image:
+      radial-gradient(circle at 18% 0%, rgba(124,58,237,0.28) 0%, transparent 45%),
+      radial-gradient(circle at 85% 15%, rgba(168,85,247,0.16) 0%, transparent 40%);
+    background-attachment:fixed;
+    min-height:100vh;
+  }
+  .disp{font-family:'Outfit',sans-serif;font-weight:700;}
+  .tnum{font-variant-numeric:tabular-nums;}
+  a{color:inherit;}
+  button{font-family:inherit;}
+  ::selection{background:var(--violet);color:#fff;}
+  :focus-visible{outline:2px solid var(--violet-bright);outline-offset:2px;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px;}
+  .hidden{display:none !important;}
+
+  @keyframes viewIn{ from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+  .view-anim{animation:viewIn 0.32s ease;}
+  @keyframes popIn{ 0%{transform:scale(0.9);opacity:0.5;} 60%{transform:scale(1.03);opacity:1;} 100%{transform:scale(1);} }
+  .pop{animation:popIn 0.28s ease;}
+  @keyframes glowPulse{ 0%,100%{ box-shadow:0 0 10px var(--glow-soft), 0 0 0 rgba(0,0,0,0);} 50%{ box-shadow:0 0 22px var(--glow), 0 0 2px rgba(255,255,255,0.2);} }
+  @media (prefers-reduced-motion: reduce){
+    .view-anim,.pop{animation:none;}
+    .brand .mark{animation:none !important;}
+  }
+
+  /* ---------- NAV ---------- */
+  header.site{
+    position:sticky;top:0;z-index:30;
+    background:rgba(10,7,19,0.75);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;}
+  .back-link{font-size:13.5px;color:var(--ink-dim);text-decoration:none;flex-shrink:0;}
+  .back-link:hover{color:var(--violet-bright);}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer;background:none;border:none;padding:0;}
+  .brand .mark{
+    width:34px;height:34px;border-radius:11px;
+    background:linear-gradient(135deg, var(--violet), var(--violet-2));
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-family:'Outfit',sans-serif;font-weight:800;font-size:16px;flex-shrink:0;
+    animation:glowPulse 3.2s ease-in-out infinite;
+  }
+  .brand .word{font-family:'Outfit',sans-serif;font-weight:700;font-size:19px;color:var(--ink);}
+  .brand .word span{color:var(--violet-bright);}
+
+  main{padding:36px 0 70px;}
+
+  /* ---------- HERO ---------- */
+  .hero{margin-bottom:30px;}
+  .hero h1{font-size:clamp(28px,5vw,42px);margin:0 0 10px;line-height:1.15;max-width:17ch;color:var(--ink);}
+  .hero p{color:var(--ink-dim);font-size:16px;max-width:54ch;margin:0;}
+
+  /* ---------- GLASS PANEL BASE ---------- */
+  .glass{
+    background:var(--panel);backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius);
+    box-shadow:0 14px 34px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  /* ---------- QUICK ASK ---------- */
+  .quickask{margin-top:24px;padding:18px 20px;}
+  .quickask-label{
+    font-size:13px;color:var(--violet-bright);font-weight:700;margin-bottom:10px;
+    display:flex;align-items:center;gap:7px;
+  }
+  .quickask-row{display:flex;gap:10px;}
+  .quickask input{
+    flex:1;background:rgba(10,7,19,0.6);border:1px solid var(--line-strong);color:var(--ink);
+    padding:13px 15px;border-radius:var(--radius-sm);font-size:14.5px;font-family:inherit;
+  }
+  .quickask input:focus{border-color:var(--violet-bright);box-shadow:0 0 0 3px var(--glow-soft);}
+  .quickask button{
+    background:linear-gradient(135deg, var(--violet), var(--violet-2));color:#fff;border:none;
+    padding:0 22px;border-radius:var(--radius-sm);font-weight:700;font-size:14px;cursor:pointer;
+    flex-shrink:0;box-shadow:0 0 18px var(--glow-soft);transition:box-shadow 0.15s ease, transform 0.1s ease;
+  }
+  .quickask button:hover{box-shadow:0 0 26px var(--glow);}
+  .quickask button:active{transform:scale(0.97);}
+  .quickask-result{
+    margin-top:14px;padding-top:14px;border-top:1px dashed var(--line-strong);
+    font-size:14.5px;color:var(--ink);display:none;
+  }
+  .quickask-result.show{display:block;}
+  .quickask-result .big{font-family:'Outfit',sans-serif;font-weight:700;color:var(--violet-bright);font-size:21px;}
+  .quickask-hint{font-size:12.5px;color:var(--ink-faint);margin-top:10px;}
+  .search-results{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .search-chip{
+    background:rgba(255,255,255,0.05);border:1px solid var(--line-strong);color:var(--ink);
+    padding:9px 15px;border-radius:20px;font-size:13.5px;cursor:pointer;
+    transition:border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  }
+  .search-chip:hover{border-color:var(--violet-bright);box-shadow:0 0 14px var(--glow-soft);}
+  .search-chip:active{transform:scale(0.96);}
+
+  /* ---------- CATEGORY GRID ---------- */
+  .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:32px;}
+  .cat-card{
+    padding:24px 20px;cursor:pointer;text-align:left;
+    transition:transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .cat-card:hover{transform:translateY(-5px);border-color:rgba(168,85,247,0.5);box-shadow:0 18px 40px rgba(0,0,0,0.6), 0 0 24px var(--glow-soft);}
+  .cat-card:active{transform:translateY(-2px) scale(0.99);}
+  .cat-card .icon-badge{
+    width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.35);font-size:22px;
+  }
+  .cat-card .name{font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;color:var(--ink);}
+  .cat-card .count{font-size:13px;color:var(--ink-faint);}
+
+  @media (max-width:760px){ .cat-grid{grid-template-columns:1fr 1fr;} }
+  @media (max-width:480px){ .cat-grid{grid-template-columns:1fr;} }
+
+  /* ---------- CATEGORY VIEW ---------- */
+  .breadcrumb{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-dim);margin-bottom:24px;}
+  .breadcrumb button{
+    background:none;border:none;color:var(--ink-dim);cursor:pointer;font-size:14px;padding:0;
+    text-decoration:underline;text-underline-offset:3px;
+  }
+  .breadcrumb button:hover{color:var(--violet-bright);}
+  .cat-title{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  .cat-title .icon-badge{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.35);font-size:22px;}
+  .cat-title h2{font-family:'Outfit',sans-serif;font-weight:700;font-size:26px;margin:0;color:var(--ink);}
+  .cat-desc{color:var(--ink-dim);font-size:15px;margin:0 0 28px;max-width:56ch;}
+
+  .tool-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  @media (max-width:600px){ .tool-grid{grid-template-columns:1fr;} }
+  .tool-card{
+    padding:17px 19px;display:flex;justify-content:space-between;align-items:center;gap:12px;
+    cursor:pointer;transition:transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+  .tool-card:hover{transform:translateY(-3px);border-color:rgba(168,85,247,0.45);box-shadow:0 10px 26px rgba(0,0,0,0.5), 0 0 16px var(--glow-soft);}
+  .tool-card.soon{cursor:default;opacity:0.5;}
+  .tool-card.soon:hover{transform:none;box-shadow:none;}
+  .tool-card .name{font-weight:600;font-size:15px;color:var(--ink);}
+  .tool-card .arrow{color:var(--violet-bright);font-size:17px;flex-shrink:0;}
+  .tool-card .soon-tag{font-size:11px;color:var(--ink-faint);border:1px solid var(--line-strong);padding:3px 8px;border-radius:20px;flex-shrink:0;}
+
+  /* ---------- TOOL VIEW ---------- */
+  .tool-header{margin-bottom:24px;}
+  .tool-header h2{font-family:'Outfit',sans-serif;font-weight:700;font-size:25px;margin:0 0 6px;color:var(--ink);}
+  .tool-header p{color:var(--ink-dim);font-size:14.5px;margin:0;max-width:56ch;}
+
+  .tool-panel{display:grid;grid-template-columns:1fr 1fr;overflow:hidden;}
+  .tool-panel.calc-mode{grid-template-columns:1fr;}
+  .tool-panel.calc-mode .tool-result{display:none;}
+  @media (max-width:700px){ .tool-panel{grid-template-columns:1fr;} }
+
+  .tool-form{padding:24px;border-right:1px solid var(--line);}
+  @media (max-width:700px){ .tool-form{border-right:none;border-bottom:1px solid var(--line);} }
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:13px;color:var(--ink-dim);margin-bottom:6px;font-weight:600;}
+  .field input, .field select, .field textarea{
+    width:100%;background:rgba(10,7,19,0.55);border:1px solid var(--line-strong);color:var(--ink);
+    padding:11px 13px;border-radius:var(--radius-sm);font-size:14.5px;font-family:inherit;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--violet-bright);box-shadow:0 0 0 3px var(--glow-soft);}
+  .field textarea{min-height:110px;resize:vertical;}
+
+  .tool-result{padding:24px;display:flex;flex-direction:column;justify-content:center;}
+  .result-empty{color:var(--ink-faint);font-size:14px;}
+  .result-headline .label{font-size:13px;color:var(--ink-dim);margin-bottom:6px;}
+  .result-headline .value{
+    font-family:'Outfit',sans-serif;font-weight:800;font-size:32px;color:var(--violet-bright);
+    text-shadow:0 0 22px var(--glow-soft);
+  }
+  .result-lines{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);}
+  .result-line{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;color:var(--ink-dim);}
+  .result-line b{color:var(--ink);font-weight:600;}
+  .result-note{margin-top:16px;font-size:12.5px;color:var(--ink-faint);line-height:1.5;}
+
+  /* ---------- BASIC CALCULATOR ---------- */
+  .calc-wrap{max-width:340px;margin:0 auto;padding:6px 0;}
+  .calc-display{
+    background:rgba(10,7,19,0.6);border:1px solid var(--line-strong);border-radius:var(--radius-sm);
+    padding:24px 18px;text-align:right;font-family:'Outfit',sans-serif;font-weight:700;
+    font-size:clamp(24px,7vw,32px);color:var(--violet-bright);text-shadow:0 0 18px var(--glow-soft);
+    margin-bottom:16px;overflow-x:auto;white-space:nowrap;
+  }
+  .calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .calc-btn{
+    background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--ink);
+    border-radius:var(--radius-sm);padding:16px 0;font-size:17px;font-weight:600;cursor:pointer;
+    transition:transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+  .calc-btn:hover{background:rgba(255,255,255,0.08);}
+  .calc-btn:active{transform:scale(0.94);}
+  .calc-btn.op{background:rgba(168,85,247,0.14);border-color:rgba(168,85,247,0.4);color:var(--violet-bright);}
+  .calc-btn.op:hover{box-shadow:0 0 16px var(--glow-soft);}
+  .calc-btn.util{color:var(--ink-dim);}
+  .calc-btn.equals{
+    background:linear-gradient(135deg, var(--violet), var(--violet-2));color:#fff;border:none;
+    box-shadow:0 0 20px var(--glow-soft);
+  }
+  .calc-btn.equals:hover{box-shadow:0 0 28px var(--glow);}
+  .calc-btn.zero{grid-column:span 2;}
+
+  footer.site{border-top:1px solid var(--line);padding:26px 0 40px;text-align:center;color:var(--ink-faint);font-size:13px;}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap nav">
+    <a href="index.html" class="back-link">← ToolBox</a>
+    <button class="brand" id="logoBtn">
+      <span class="mark">₹</span>
+      <span class="word">Hisaab<span>Box</span></span>
+    </button>
+    <span style="width:70px;" class="back-link-spacer"></span>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ================= HOME VIEW ================= -->
+  <div id="view-home">
+    <div class="hero">
+      <h1 class="disp">Jo bhi calculate karna hai, yahan hai.</h1>
+      <p>Finance, creator earnings, student aur health calculators — sab ek jagah, bina sign-up ke, bilkul free.</p>
+    </div>
+
+    <div class="quickask glass">
+      <div class="quickask-label">🔍 Koi bhi calculator dhoondo</div>
+      <div class="quickask-row">
+        <input type="text" id="toolSearchInput" placeholder="jaise: EMI, BMI, YouTube, age, calculator...">
+      </div>
+      <div class="quickask-hint" id="searchCaption">Popular:</div>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+
+  <!-- ================= CATEGORY VIEW ================= -->
+  <div id="view-category" class="hidden">
+    <div class="breadcrumb"><button id="backToHomeFromCat">← Home</button></div>
+    <div class="cat-title"><span class="icon-badge" id="catViewIcon"></span><h2 class="disp" id="catViewName"></h2></div>
+    <p class="cat-desc" id="catViewDesc"></p>
+    <div class="tool-grid" id="toolGrid"></div>
+  </div>
+
+  <!-- ================= TOOL VIEW ================= -->
+  <div id="view-tool" class="hidden">
+    <div class="breadcrumb">
+      <button id="backToHomeFromTool">← Home</button>
+      <span>/</span>
+      <button id="backToCatFromTool"></button>
+    </div>
+    <div class="tool-header">
+      <h2 id="toolTitle"></h2>
+      <p id="toolDesc"></p>
+    </div>
+    <div class="tool-panel glass" id="toolPanel">
+      <div class="tool-form" id="toolForm"></div>
+      <div class="tool-result" id="toolResult"><div class="result-empty">Values daalo, result yahan turant dikhega.</div></div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site">HisaabBox — sab kuch client-side calculate hota hai, koi data server pe nahi jaata.</footer>
+
+<script>
+/* =========================================================
+   COUNTRY RATE PRESETS (rough ballpark estimates only)
+   ========================================================= */
+var countryOptions = [["in","India"],["us","USA"],["uk","UK"],["ca","Canada"],["au","Australia"],["de","Germany"],["ae","UAE"],["global","Other / Global Average"]];
+var ytCpmByCountry     = {in:40,  us:550, uk:420, ca:400, au:400, de:300, ae:320, global:150};
+var adsenseRevPer1000ByCountry = {in:30, us:300, uk:240, ca:210, au:210, de:150, ae:180, global:90};
+var tiktokRateByCountry= {in:3,   us:25,  uk:20,  ca:18,  au:18,  de:15,  ae:15,  global:8};
+
+/* =========================================================
+   CATEGORIES
+   ========================================================= */
+var categories = {
+  finance: { name:"Finance", icon:"💰", desc:"Loan, investment aur tax se juda har hisaab.", tools:["emi","sip","gst","compound","simpleinterest","inflation","rule72","tax","fd","rd"] },
+  creator: { name:"Creator Tools", icon:"🎥", desc:"YouTube, TikTok, ads aur social earnings ka andaza.", tools:["ytmoney","adsense","tiktok","engagement","followergrowth"] },
+  student: { name:"Student Tools", icon:"📚", desc:"Marks, attendance aur age se juda kaam.", tools:["percentage","cgpa","gpa","attendance","examneeded","age"] },
+  health:  { name:"Health & Fitness", icon:"🏃", desc:"Body aur daily routine ka basic hisaab.", tools:["bmi","calorie","water"] },
+  utility: { name:"Daily Utility", icon:"🛠️", desc:"Rozmarra ke chhote kaam ke tools.", tools:["basiccalc","datediff","discount","tip","lengthconv","weightconv","tempconv","wordcount"] }
+};
+
+/* =========================================================
+   TOOL CONFIGS
+   ========================================================= */
+var tools = {
+
+  emi: {
+    title:"EMI Calculator", category:"finance", status:"live",
+    desc:"Loan amount, interest rate aur tenure daal ke monthly EMI nikalo.",
+    fields:[
+      {key:"principal", label:"Loan Amount (₹)", type:"number", placeholder:"500000"},
+      {key:"rate", label:"Interest Rate (% per year)", type:"number", placeholder:"8.5", step:"0.1"},
+      {key:"years", label:"Tenure (years)", type:"number", placeholder:"5"}
+    ],
+    compute:function(v){
+      var P=v.principal, R=v.rate, Y=v.years;
+      if(!(P>0) || !(R>=0) || !(Y>0)) return null;
+      var r=R/12/100, n=Y*12;
+      var emi = r===0 ? P/n : P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+      var total=emi*n, interest=total-P;
+      return { headline:{label:"Monthly EMI", value:"₹"+Math.round(emi).toLocaleString('en-IN')},
+        lines:[{label:"Total Interest", value:"₹"+Math.round(interest).toLocaleString('en-IN')},{label:"Total Payment", value:"₹"+Math.round(total).toLocaleString('en-IN')}] };
+    }
+  },
+
+  sip: {
+    title:"SIP Calculator", category:"finance", status:"live",
+    desc:"Monthly investment aur expected return se maturity value nikalo.",
+    fields:[
+      {key:"monthly", label:"Monthly Investment (₹)", type:"number", placeholder:"5000"},
+      {key:"rate", label:"Expected Annual Return (%)", type:"number", placeholder:"12", step:"0.1"},
+      {key:"years", label:"Investment Period (years)", type:"number", placeholder:"10"}
+    ],
+    compute:function(v){
+      var M=v.monthly, R=v.rate, Y=v.years;
+      if(!(M>0) || !(R>=0) || !(Y>0)) return null;
+      var i=R/12/100, n=Y*12;
+      var fv = i===0 ? M*n : M*((Math.pow(1+i,n)-1)/i)*(1+i);
+      var invested=M*n, returns=fv-invested;
+      return { headline:{label:"Maturity Value", value:"₹"+Math.round(fv).toLocaleString('en-IN')},
+        lines:[{label:"Invested Amount", value:"₹"+Math.round(invested).toLocaleString('en-IN')},{label:"Estimated Returns", value:"₹"+Math.round(returns).toLocaleString('en-IN')}] };
+    }
+  },
+
+  gst: {
+    title:"GST Calculator", category:"finance", status:"live",
+    desc:"GST add karo ya kisi amount se GST nikaal ke base price dekho.",
+    fields:[
+      {key:"amount", label:"Amount (₹)", type:"number", placeholder:"1000"},
+      {key:"rate", label:"GST Rate", type:"select", options:[["5","5%"],["12","12%"],["18","18%"],["28","28%"]]},
+      {key:"mode", label:"Mode", type:"select", options:[["add","Add GST to this amount"],["remove","Amount already includes GST"]]}
+    ],
+    compute:function(v){
+      var amt=v.amount, rate=parseFloat(v.rate);
+      if(!(amt>0)) return null;
+      if(v.mode==="add"){
+        var gstAmt=amt*rate/100, total=amt+gstAmt;
+        return { headline:{label:"Total (with GST)", value:"₹"+total.toFixed(2)}, lines:[{label:"GST Amount", value:"₹"+gstAmt.toFixed(2)},{label:"Base Amount", value:"₹"+amt.toFixed(2)}] };
+      } else {
+        var base=amt/(1+rate/100), gstAmt2=amt-base;
+        return { headline:{label:"Base Amount (before GST)", value:"₹"+base.toFixed(2)}, lines:[{label:"GST Amount", value:"₹"+gstAmt2.toFixed(2)},{label:"Total (with GST)", value:"₹"+amt.toFixed(2)}] };
+      }
+    }
+  },
+
+  compound: {
+    title:"Compound Interest Calculator", category:"finance", status:"live",
+    desc:"Principal, rate aur compounding frequency se maturity amount nikalo.",
+    fields:[
+      {key:"principal", label:"Principal (₹)", type:"number", placeholder:"100000"},
+      {key:"rate", label:"Annual Rate (%)", type:"number", placeholder:"7", step:"0.1"},
+      {key:"years", label:"Years", type:"number", placeholder:"5"},
+      {key:"freq", label:"Compounding", type:"select", options:[["1","Yearly"],["2","Half-yearly"],["4","Quarterly"],["12","Monthly"]]}
+    ],
+    compute:function(v){
+      var P=v.principal, R=v.rate, Y=v.years, n=parseFloat(v.freq);
+      if(!(P>0) || !(R>=0) || !(Y>0)) return null;
+      var A=P*Math.pow(1+(R/100)/n, n*Y);
+      return { headline:{label:"Maturity Amount", value:"₹"+Math.round(A).toLocaleString('en-IN')},
+        lines:[{label:"Interest Earned", value:"₹"+Math.round(A-P).toLocaleString('en-IN')},{label:"Principal", value:"₹"+Math.round(P).toLocaleString('en-IN')}] };
+    }
+  },
+
+  simpleinterest: {
+    title:"Simple Interest Calculator", category:"finance", status:"live",
+    desc:"Principal, rate aur time se simple interest nikalo.",
+    fields:[
+      {key:"principal", label:"Principal (₹)", type:"number", placeholder:"50000"},
+      {key:"rate", label:"Rate (% per year)", type:"number", placeholder:"6", step:"0.1"},
+      {key:"years", label:"Time (years)", type:"number", placeholder:"3"}
+    ],
+    compute:function(v){
+      var P=v.principal, R=v.rate, T=v.years;
+      if(!(P>0) || !(R>=0) || !(T>0)) return null;
+      var si=P*R*T/100;
+      return { headline:{label:"Total Amount", value:"₹"+Math.round(P+si).toLocaleString('en-IN')}, lines:[{label:"Simple Interest", value:"₹"+Math.round(si).toLocaleString('en-IN')}] };
+    }
+  },
+
+  inflation: {
+    title:"Inflation Impact Calculator", category:"finance", status:"live",
+    desc:"Aaj ki koi cheez N saal baad kitni mehengi hogi, dekho.",
+    fields:[
+      {key:"amount", label:"Today's Cost (₹)", type:"number", placeholder:"10000"},
+      {key:"rate", label:"Expected Inflation Rate (% per year)", type:"number", placeholder:"6", step:"0.1"},
+      {key:"years", label:"Years From Now", type:"number", placeholder:"10"}
+    ],
+    compute:function(v){
+      var A=v.amount, R=v.rate, Y=v.years;
+      if(!(A>0) || !(R>=0) || !(Y>0)) return null;
+      var future=A*Math.pow(1+R/100,Y);
+      return { headline:{label:"Future Cost", value:"₹"+Math.round(future).toLocaleString('en-IN')}, lines:[{label:"Extra Cost (Inflation Impact)", value:"₹"+Math.round(future-A).toLocaleString('en-IN')}],
+        note:"Assume kiya gaya hai ki inflation rate saalon tak constant rahegi — real life mein ye ghatti-badhti rehti hai." };
+    }
+  },
+
+  rule72: {
+    title:"Doubling Time (Rule of 72)", category:"finance", status:"live",
+    desc:"Kisi bhi return rate pe paisa double hone mein kitna time lagega.",
+    fields:[{key:"rate", label:"Annual Return Rate (%)", type:"number", placeholder:"12", step:"0.1"}],
+    compute:function(v){
+      if(!(v.rate>0)) return null;
+      var years=72/v.rate;
+      return { headline:{label:"Approx Doubling Time", value:years.toFixed(1)+" years"}, lines:[],
+        note:"Rule of 72 ek quick mental-math estimate hai, exact compound calculation nahi." };
+    }
+  },
+
+  tax: {
+    title:"Income Tax Calculator (India)", category:"finance", status:"live",
+    desc:"New vs Old regime dono ka tax nikalo, FY 2025-26 slabs ke hisaab se.",
+    fields:[
+      {key:"income", label:"Annual Income (₹)", type:"number", placeholder:"1200000"},
+      {key:"salaried", label:"Are you salaried?", type:"select", options:[["yes","Yes (standard deduction applies)"],["no","No"]]}
+    ],
+    compute:function(v){
+      var income=v.income;
+      if(!(income>0)) return null;
+      function slabTax(amt, slabs){
+        var tax=0, prev=0;
+        for(var i=0;i<slabs.length;i++){
+          var upper=slabs[i][0], rate=slabs[i][1];
+          if(amt>prev){ tax += (Math.min(amt,upper)-prev)*rate; prev=upper; } else break;
+        }
+        return tax;
+      }
+      var newSlabs=[[400000,0],[800000,0.05],[1200000,0.10],[1600000,0.15],[2000000,0.20],[2400000,0.25],[Infinity,0.30]];
+      var oldSlabs=[[250000,0],[500000,0.05],[1000000,0.20],[Infinity,0.30]];
+      var stdNew = v.salaried==="yes" ? 75000 : 0;
+      var stdOld = v.salaried==="yes" ? 50000 : 0;
+      var taxableNew=Math.max(income-stdNew,0), taxableOld=Math.max(income-stdOld,0);
+      var taxNewBase = taxableNew<=1200000 ? 0 : slabTax(taxableNew,newSlabs);
+      var taxOldBase = taxableOld<=500000 ? 0 : slabTax(taxableOld,oldSlabs);
+      var taxNew=Math.round(taxNewBase*1.04), taxOld=Math.round(taxOldBase*1.04);
+      var better = taxNew<=taxOld ? "New Regime" : "Old Regime";
+      return { headline:{label:"Tax under New Regime", value:"₹"+taxNew.toLocaleString('en-IN')},
+        lines:[{label:"Tax under Old Regime", value:"₹"+taxOld.toLocaleString('en-IN')},{label:"Lower Tax In", value:better}],
+        note:"FY 2025-26 New Regime slabs use kiye hain (4% cess included, ₹12L tak rebate se tax-free). Old Regime mein 80C/HRA jaisi deductions include nahi ki gayi — wo lene se Old Regime ka number aur kam ho sakta hai. Ye estimate hai, ITR file karne se pehle CA se confirm karo." };
+    }
+  },
+  fd: {
+    title:"FD Calculator", category:"finance", status:"live",
+    desc:"Fixed Deposit ki maturity value nikalo.",
+    fields:[
+      {key:"principal", label:"Deposit Amount (₹)", type:"number", placeholder:"100000"},
+      {key:"rate", label:"Interest Rate (% per year)", type:"number", placeholder:"7", step:"0.1"},
+      {key:"years", label:"Tenure (years)", type:"number", placeholder:"5"},
+      {key:"freq", label:"Compounding", type:"select", options:[["4","Quarterly (most common)"],["1","Yearly"],["2","Half-yearly"],["12","Monthly"]]}
+    ],
+    compute:function(v){
+      var P=v.principal, R=v.rate, Y=v.years, n=parseFloat(v.freq);
+      if(!(P>0) || !(R>=0) || !(Y>0)) return null;
+      var A=P*Math.pow(1+(R/100)/n, n*Y);
+      return { headline:{label:"Maturity Value", value:"₹"+Math.round(A).toLocaleString('en-IN')}, lines:[{label:"Interest Earned", value:"₹"+Math.round(A-P).toLocaleString('en-IN')}] };
+    }
+  },
+  rd: {
+    title:"RD Calculator", category:"finance", status:"live",
+    desc:"Recurring Deposit ki maturity value nikalo.",
+    fields:[
+      {key:"monthly", label:"Monthly Deposit (₹)", type:"number", placeholder:"3000"},
+      {key:"rate", label:"Interest Rate (% per year)", type:"number", placeholder:"6.5", step:"0.1"},
+      {key:"months", label:"Tenure (months)", type:"number", placeholder:"24"}
+    ],
+    compute:function(v){
+      var R=v.monthly, rate=v.rate, months=v.months;
+      if(!(R>0) || !(rate>=0) || !(months>0)) return null;
+      var i=rate/400, n=months/3;
+      var M = R*((Math.pow(1+i,n)-1)/(1-Math.pow(1+i,-1/3)));
+      var invested=R*months;
+      return { headline:{label:"Maturity Value", value:"₹"+Math.round(M).toLocaleString('en-IN')}, lines:[{label:"Total Deposited", value:"₹"+Math.round(invested).toLocaleString('en-IN')},{label:"Interest Earned", value:"₹"+Math.round(M-invested).toLocaleString('en-IN')}],
+        note:"Banks RD compounding thoda alag tareeke se calculate karte hain, ye ek standard approximate formula hai." };
+    }
+  },
+
+  ytmoney: {
+    title:"YouTube Money Calculator", category:"creator", status:"live",
+    desc:"Bas country, level aur views choose karo — CPM/RPM ka number tumhe pata hone ki zaroorat nahi.",
+    fields:[
+      {key:"country", label:"Audience Country", type:"select", options:countryOptions},
+      {key:"tier", label:"Estimate Level", type:"select", options:[["low","Low (conservative)"],["avg","Average (typical)"],["high","High (best case)"]]},
+      {key:"views", label:"Daily Views", type:"number", placeholder:"10000"}
+    ],
+    compute:function(v){
+      var base=ytCpmByCountry[v.country];
+      if(base===undefined || !(v.views>0)) return null;
+      var mult = v.tier==="low"?0.6 : v.tier==="high"?1.6 : 1;
+      var cpm=base*mult, daily=v.views*(cpm/1000);
+      return { headline:{label:"Estimated Monthly Earning", value:"₹"+Math.round(daily*30).toLocaleString('en-IN')},
+        lines:[{label:"Daily Estimate", value:"₹"+Math.round(daily).toLocaleString('en-IN')},{label:"Yearly Estimate", value:"₹"+Math.round(daily*365).toLocaleString('en-IN')},{label:"Rate Used", value:"₹"+Math.round(cpm)+" per 1000 views"}],
+        note:"Rough ballpark estimate hai (country ke hisaab se) — actual CPM niche, season aur channel history pe bhi depend karta hai." };
+    }
+  },
+
+  tiktok: {
+    title:"TikTok Earnings Calculator", category:"creator", status:"live",
+    desc:"Bas country, level aur views choose karo — koi rate type karne ki zaroorat nahi.",
+    fields:[
+      {key:"country", label:"Audience Country", type:"select", options:countryOptions},
+      {key:"tier", label:"Estimate Level", type:"select", options:[["low","Low (conservative)"],["avg","Average (typical)"],["high","High (best case)"]]},
+      {key:"views", label:"Daily Views", type:"number", placeholder:"20000"}
+    ],
+    compute:function(v){
+      var base=tiktokRateByCountry[v.country];
+      if(base===undefined || !(v.views>0)) return null;
+      var mult = v.tier==="low"?0.6 : v.tier==="high"?1.6 : 1;
+      var rate=base*mult, daily=v.views*(rate/1000);
+      return { headline:{label:"Estimated Monthly Earning", value:"₹"+Math.round(daily*30).toLocaleString('en-IN')},
+        lines:[{label:"Daily Estimate", value:"₹"+Math.round(daily).toLocaleString('en-IN')},{label:"Yearly Estimate", value:"₹"+Math.round(daily*365).toLocaleString('en-IN')},{label:"Rate Used", value:"₹"+Math.round(rate)+" per 1000 views"}],
+        note:"TikTok ki Creator Fund/Rewards rates bahut variable hain — real income mein brand deals ka hissa aksar zyada hota hai." };
+    }
+  },
+
+  adsense: {
+    title:"AdSense Revenue Calculator", category:"creator", status:"live",
+    desc:"Bas country, level aur pageviews choose karo — CPC/CTR jaanna zaroori nahi.",
+    fields:[
+      {key:"country", label:"Visitor Country", type:"select", options:countryOptions},
+      {key:"tier", label:"Estimate Level", type:"select", options:[["low","Low (conservative)"],["avg","Average (typical)"],["high","High (best case)"]]},
+      {key:"views", label:"Daily Pageviews", type:"number", placeholder:"2000"}
+    ],
+    compute:function(v){
+      var base=adsenseRevPer1000ByCountry[v.country];
+      if(base===undefined || !(v.views>0)) return null;
+      var mult = v.tier==="low"?0.6 : v.tier==="high"?1.6 : 1;
+      var rate=base*mult, daily=v.views*(rate/1000);
+      return { headline:{label:"Estimated Monthly Revenue", value:"₹"+Math.round(daily*30).toLocaleString('en-IN')},
+        lines:[{label:"Daily Estimate", value:"₹"+Math.round(daily).toLocaleString('en-IN')},{label:"Yearly Estimate", value:"₹"+Math.round(daily*365).toLocaleString('en-IN')},{label:"Rate Used", value:"₹"+Math.round(rate)+" per 1000 pageviews"}],
+        note:"Real revenue niche aur geography pe depend karta hai, ye ek rough planning number hai (average CTR/CPC dono is number mein assume kiye gaye hain)." };
+    }
+  },
+
+  engagement: {
+    title:"Engagement Rate Calculator", category:"creator", status:"live",
+    desc:"Followers ke against likes/comments dekh ke engagement % nikalo.",
+    fields:[
+      {key:"followers", label:"Followers", type:"number", placeholder:"10000"},
+      {key:"likes", label:"Average Likes per post", type:"number", placeholder:"400"},
+      {key:"comments", label:"Average Comments per post", type:"number", placeholder:"20"}
+    ],
+    compute:function(v){
+      var f=v.followers, l=v.likes, c=v.comments;
+      if(!(f>0) || !(l>=0) || !(c>=0)) return null;
+      var rate=((l+c)/f)*100;
+      var note = rate>=6 ? "Ye high engagement mana jaata hai." : rate>=1 ? "Ye average/theek-thaak engagement hai." : "Ye low engagement hai, industry rough benchmark ke hisaab se.";
+      return { headline:{label:"Engagement Rate", value:rate.toFixed(2)+"%"}, lines:[], note:note+" (rough benchmark, niche ke hisaab se badalta hai)" };
+    }
+  },
+
+  followergrowth: {
+    title:"Follower Growth Calculator", category:"creator", status:"live",
+    desc:"Current followers aur monthly growth rate se future followers ka andaza.",
+    fields:[
+      {key:"current", label:"Current Followers", type:"number", placeholder:"5000"},
+      {key:"rate", label:"Monthly Growth Rate (%)", type:"number", placeholder:"8", step:"0.1"},
+      {key:"months", label:"Months From Now", type:"number", placeholder:"6"}
+    ],
+    compute:function(v){
+      var cur=v.current, rate=v.rate, months=v.months;
+      if(!(cur>0) || !(rate>=0) || !(months>0)) return null;
+      var future=cur*Math.pow(1+rate/100, months);
+      return { headline:{label:"Estimated Followers", value:Math.round(future).toLocaleString('en-IN')}, lines:[{label:"Growth Added", value:"+"+Math.round(future-cur).toLocaleString('en-IN')}],
+        note:"Assume kiya gaya hai ki growth rate constant rahegi — real growth mein ups-downs hote hain." };
+    }
+  },
+
+  percentage: {
+    title:"Percentage Calculator", category:"student", status:"live",
+    desc:"Obtained marks aur total marks se percentage nikalo.",
+    fields:[
+      {key:"obtained", label:"Marks Obtained", type:"number", placeholder:"420"},
+      {key:"total", label:"Total Marks", type:"number", placeholder:"500"}
+    ],
+    compute:function(v){
+      if(!(v.total>0)) return null;
+      var pct=(v.obtained/v.total)*100;
+      return { headline:{label:"Percentage", value:pct.toFixed(2)+"%"}, lines:[] };
+    }
+  },
+
+  cgpa: {
+    title:"CGPA to Percentage", category:"student", status:"live",
+    desc:"CGPA (10 point scale) ko percentage mein convert karo.",
+    fields:[{key:"cgpa", label:"CGPA (out of 10)", type:"number", placeholder:"8.4", step:"0.01"}],
+    compute:function(v){
+      if(!(v.cgpa>=0)) return null;
+      var pct=v.cgpa*9.5;
+      return { headline:{label:"Equivalent Percentage", value:pct.toFixed(2)+"%"}, lines:[],
+        note:"CGPA × 9.5 wala formula zyadatar Indian universities use karti hain — apni university ka official formula bhi confirm kar lena." };
+    }
+  },
+
+  gpa: {
+    title:"Percentage to GPA (4.0 Scale)", category:"student", status:"live",
+    desc:"Percentage ko US-style 4.0 GPA scale mein convert karo.",
+    fields:[{key:"pct", label:"Percentage", type:"number", placeholder:"85", step:"0.1"}],
+    compute:function(v){
+      var p=v.pct;
+      if(!(p>=0)) return null;
+      var gpa = p>=90?4.0 : p>=80?3.7 : p>=70?3.0 : p>=60?2.0 : p>=50?1.0 : 0.0;
+      return { headline:{label:"GPA (4.0 scale)", value:gpa.toFixed(1)}, lines:[],
+        note:"Ye ek common conversion scale hai — tumhara institute apna alag scale bhi use kar sakta hai." };
+    }
+  },
+
+  attendance: {
+    title:"Attendance Percentage Calculator", category:"student", status:"live",
+    desc:"Kitni classes attend ki, kitni miss kar sakte ho — dono nikalo.",
+    fields:[
+      {key:"attended", label:"Classes Attended", type:"number", placeholder:"60"},
+      {key:"total", label:"Total Classes Held", type:"number", placeholder:"75"},
+      {key:"required", label:"Required Attendance (%)", type:"number", placeholder:"75"}
+    ],
+    compute:function(v){
+      var a=v.attended, t=v.total, req=v.required;
+      if(!(t>0) || !(req>0)) return null;
+      var pct=(a/t)*100;
+      var lines=[];
+      if(pct>=req){
+        var maxMiss=Math.floor((a*100/req)-t);
+        if(maxMiss<0) maxMiss=0;
+        lines.push({label:"Classes you can still miss", value:maxMiss+" (aur bhi "+req+"% maintain rahega)"});
+      } else {
+        var needed=Math.ceil(((req/100*t)-a)/(1-req/100));
+        lines.push({label:"Classes needed continuously", value:needed+" classes lagatar attend karo "+req+"% tak pahunchne ke liye"});
+      }
+      return { headline:{label:"Current Attendance", value:pct.toFixed(1)+"%"}, lines:lines };
+    }
+  },
+
+  examneeded: {
+    title:"Exams Needed Score Calculator", category:"student", status:"live",
+    desc:"Target average paane ke liye baaki exams mein kitna chahiye, jaano.",
+    fields:[
+      {key:"currentAvg", label:"Current Average (%)", type:"number", placeholder:"70"},
+      {key:"examsSoFar", label:"Exams Completed So Far", type:"number", placeholder:"3"},
+      {key:"examsRemaining", label:"Exams Remaining", type:"number", placeholder:"2"},
+      {key:"targetAvg", label:"Target Average (%)", type:"number", placeholder:"80"}
+    ],
+    compute:function(v){
+      var ca=v.currentAvg, es=v.examsSoFar, er=v.examsRemaining, ta=v.targetAvg;
+      if(!(es>=0) || !(er>0) || !(ta>=0)) return null;
+      var needed=((ta*(es+er))-(ca*es))/er;
+      var note = needed>100 ? "Ye target abhi ke exams se mathematically bahut mushkil hai (100% se zyada chahiye hoga)." : needed<0 ? "Target already secure hai, baaki exams mein 0% bhi chalega average ke liye." : "Ye average har baaki exam mein chahiye.";
+      return { headline:{label:"Required Average (remaining exams)", value:needed.toFixed(1)+"%"}, lines:[], note:note };
+    }
+  },
+
+  age: {
+    title:"Age Calculator", category:"student", status:"live",
+    desc:"Date of birth se exact age (saal, mahine, din) nikalo.",
+    fields:[{key:"dob", label:"Date of Birth", type:"date"}],
+    compute:function(v){
+      if(!v.dob) return null;
+      var dob=new Date(v.dob), today=new Date();
+      if(isNaN(dob.getTime()) || dob>today) return null;
+      var years=today.getFullYear()-dob.getFullYear();
+      var months=today.getMonth()-dob.getMonth();
+      var days=today.getDate()-dob.getDate();
+      if(days<0){ months--; days += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); }
+      if(months<0){ years--; months+=12; }
+      var nextBday=new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+      if(nextBday<today) nextBday.setFullYear(today.getFullYear()+1);
+      var daysToBday=Math.ceil((nextBday-today)/86400000);
+      return { headline:{label:"Your Age", value:years+" years, "+months+" months, "+days+" days"}, lines:[{label:"Next Birthday In", value:daysToBday+" days"}] };
+    }
+  },
+
+  bmi: {
+    title:"BMI Calculator", category:"health", status:"live",
+    desc:"Weight aur height se Body Mass Index nikalo.",
+    fields:[
+      {key:"weight", label:"Weight (kg)", type:"number", placeholder:"65"},
+      {key:"height", label:"Height (cm)", type:"number", placeholder:"170"}
+    ],
+    compute:function(v){
+      var w=v.weight, h=v.height;
+      if(!(w>0) || !(h>0)) return null;
+      var bmi=w/Math.pow(h/100,2);
+      var cat = bmi<18.5 ? "Underweight" : bmi<25 ? "Normal" : bmi<30 ? "Overweight" : "Obese";
+      return { headline:{label:"Your BMI", value:bmi.toFixed(1)}, lines:[{label:"Category", value:cat}], note:"Ye general guideline hai, medical advice ke liye doctor se consult karo." };
+    }
+  },
+
+  calorie: {
+    title:"Calorie (BMR/TDEE) Calculator", category:"health", status:"live",
+    desc:"Roz kitni calories chahiye, apni body aur activity ke hisaab se.",
+    fields:[
+      {key:"gender", label:"Gender", type:"select", options:[["m","Male"],["f","Female"]]},
+      {key:"weight", label:"Weight (kg)", type:"number", placeholder:"65"},
+      {key:"height", label:"Height (cm)", type:"number", placeholder:"170"},
+      {key:"age", label:"Age (years)", type:"number", placeholder:"25"},
+      {key:"activity", label:"Activity Level", type:"select", options:[["1.2","Sedentary (little/no exercise)"],["1.375","Light (1-3 days/week)"],["1.55","Moderate (3-5 days/week)"],["1.725","Active (6-7 days/week)"],["1.9","Very Active (physical job/training)"]]}
+    ],
+    compute:function(v){
+      var w=v.weight, h=v.height, a=v.age, act=parseFloat(v.activity);
+      if(!(w>0) || !(h>0) || !(a>0)) return null;
+      var bmr = v.gender==="m" ? (10*w+6.25*h-5*a+5) : (10*w+6.25*h-5*a-161);
+      var tdee=bmr*act;
+      return { headline:{label:"Daily Calorie Need", value:Math.round(tdee).toLocaleString('en-IN')+" kcal"}, lines:[{label:"Base Metabolic Rate (BMR)", value:Math.round(bmr).toLocaleString('en-IN')+" kcal"}],
+        note:"General estimate hai — fitness goal ke hisaab se dietician/trainer se confirm karo." };
+    }
+  },
+
+  water: {
+    title:"Water Intake Calculator", category:"health", status:"live",
+    desc:"Weight aur activity ke hisaab se roz kitna paani peena chahiye.",
+    fields:[
+      {key:"weight", label:"Weight (kg)", type:"number", placeholder:"65"},
+      {key:"activity", label:"Activity Level", type:"select", options:[["low","Low"],["moderate","Moderate"],["high","High"]]}
+    ],
+    compute:function(v){
+      var w=v.weight;
+      if(!(w>0)) return null;
+      var base=w*0.033;
+      var extra = v.activity==="high" ? 0.5 : v.activity==="moderate" ? 0.3 : 0;
+      return { headline:{label:"Recommended Water Intake", value:(base+extra).toFixed(1)+" litres/day"}, lines:[] };
+    }
+  },
+
+  basiccalc: {
+    title:"Basic Calculator", category:"utility", status:"live", custom:"basiccalc",
+    desc:"Normal calculator — jodna, ghatana, guna, bhaag, sab kuch.",
+    fields:[], compute:function(){return null;}
+  },
+
+  datediff: {
+    title:"Date Difference Calculator", category:"utility", status:"live",
+    desc:"Do dates ke beech kitna time hai, exact din aur saal mein.",
+    fields:[{key:"date1", label:"From Date", type:"date"},{key:"date2", label:"To Date", type:"date"}],
+    compute:function(v){
+      if(!v.date1 || !v.date2) return null;
+      var d1=new Date(v.date1), d2=new Date(v.date2);
+      if(isNaN(d1.getTime()) || isNaN(d2.getTime())) return null;
+      var diffDays=Math.round(Math.abs(d2-d1)/86400000);
+      var years=Math.floor(diffDays/365.25);
+      var months=Math.floor((diffDays%365.25)/30.44);
+      return { headline:{label:"Total Difference", value:diffDays.toLocaleString('en-IN')+" days"}, lines:[{label:"Approx Years & Months", value:years+" years, "+months+" months"}] };
+    }
+  },
+
+  discount: {
+    title:"Discount Calculator", category:"utility", status:"live",
+    desc:"Original price aur discount % se final price nikalo.",
+    fields:[{key:"price", label:"Original Price (₹)", type:"number", placeholder:"2000"},{key:"discount", label:"Discount (%)", type:"number", placeholder:"25"}],
+    compute:function(v){
+      var p=v.price, d=v.discount;
+      if(!(p>0) || !(d>=0)) return null;
+      var save=p*d/100;
+      return { headline:{label:"Final Price", value:"₹"+(p-save).toFixed(2)}, lines:[{label:"You Save", value:"₹"+save.toFixed(2)}] };
+    }
+  },
+
+  tip: {
+    title:"Tip / Split Calculator", category:"utility", status:"live",
+    desc:"Bill pe tip add karo aur logon mein baant do.",
+    fields:[
+      {key:"bill", label:"Bill Amount (₹)", type:"number", placeholder:"1200"},
+      {key:"tipPct", label:"Tip (%)", type:"number", placeholder:"10"},
+      {key:"people", label:"Split Between (people)", type:"number", placeholder:"1"}
+    ],
+    compute:function(v){
+      var bill=v.bill, tipPct=v.tipPct, people=v.people;
+      if(!(bill>0) || !(tipPct>=0) || !(people>0)) return null;
+      var tipAmt=bill*tipPct/100, total=bill+tipAmt;
+      return { headline:{label:"Total Bill (with tip)", value:"₹"+total.toFixed(2)}, lines:[{label:"Tip Amount", value:"₹"+tipAmt.toFixed(2)},{label:"Per Person", value:"₹"+(total/people).toFixed(2)}] };
+    }
+  },
+
+  lengthconv: {
+    title:"Length Converter", category:"utility", status:"live",
+    desc:"Meter, km, mile, feet, inch — sab aapas mein convert karo.",
+    fields:[
+      {key:"value", label:"Value", type:"number", placeholder:"1"},
+      {key:"from", label:"From", type:"select", options:[["m","Meter"],["km","Kilometer"],["cm","Centimeter"],["mile","Mile"],["feet","Feet"],["inch","Inch"]]},
+      {key:"to", label:"To", type:"select", options:[["m","Meter"],["km","Kilometer"],["cm","Centimeter"],["mile","Mile"],["feet","Feet"],["inch","Inch"]]}
+    ],
+    compute:function(v){
+      var f={m:1,km:1000,cm:0.01,mile:1609.34,feet:0.3048,inch:0.0254};
+      if(!(v.value>=0)) return null;
+      var meters=v.value*f[v.from], result=meters/f[v.to];
+      return { headline:{label:"Converted Value", value:result.toFixed(4)+" "+v.to}, lines:[] };
+    }
+  },
+
+  weightconv: {
+    title:"Weight Converter", category:"utility", status:"live",
+    desc:"Kg, gram, pound, ounce — sab aapas mein convert karo.",
+    fields:[
+      {key:"value", label:"Value", type:"number", placeholder:"1"},
+      {key:"from", label:"From", type:"select", options:[["kg","Kilogram"],["g","Gram"],["lb","Pound"],["oz","Ounce"]]},
+      {key:"to", label:"To", type:"select", options:[["kg","Kilogram"],["g","Gram"],["lb","Pound"],["oz","Ounce"]]}
+    ],
+    compute:function(v){
+      var f={kg:1,g:0.001,lb:0.453592,oz:0.0283495};
+      if(!(v.value>=0)) return null;
+      var kg=v.value*f[v.from], result=kg/f[v.to];
+      return { headline:{label:"Converted Value", value:result.toFixed(4)+" "+v.to}, lines:[] };
+    }
+  },
+
+  tempconv: {
+    title:"Temperature Converter", category:"utility", status:"live",
+    desc:"Celsius, Fahrenheit, Kelvin — sab aapas mein convert karo.",
+    fields:[
+      {key:"value", label:"Value", type:"number", placeholder:"37"},
+      {key:"from", label:"From", type:"select", options:[["c","Celsius"],["f","Fahrenheit"],["k","Kelvin"]]},
+      {key:"to", label:"To", type:"select", options:[["c","Celsius"],["f","Fahrenheit"],["k","Kelvin"]]}
+    ],
+    compute:function(v){
+      if(v.value===undefined || isNaN(v.value)) return null;
+      var val=v.value;
+      var c = v.from==="c" ? val : v.from==="f" ? (val-32)*5/9 : val-273.15;
+      var result = v.to==="c" ? c : v.to==="f" ? c*9/5+32 : c+273.15;
+      return { headline:{label:"Converted Value", value:result.toFixed(2)+" °"+v.to.toUpperCase()}, lines:[] };
+    }
+  },
+
+  wordcount: {
+    title:"Word Counter", category:"utility", status:"live",
+    desc:"Text paste karo, words/characters/sentences count ho jayenge.",
+    fields:[{key:"text", label:"Your Text", type:"textarea", placeholder:"Yahan text paste karo..."}],
+    compute:function(v){
+      var text=v.text||"";
+      if(!text.trim()) return null;
+      var words=text.trim().split(/\s+/).filter(Boolean).length;
+      var chars=text.length;
+      var charsNoSpace=text.replace(/\s/g,'').length;
+      var sentences=(text.match(/[.!?]+/g)||[]).length;
+      return { headline:{label:"Word Count", value:words.toLocaleString('en-IN')},
+        lines:[{label:"Characters", value:chars.toLocaleString('en-IN')},{label:"Characters (no spaces)", value:charsNoSpace.toLocaleString('en-IN')},{label:"Sentences (approx)", value:sentences}] };
+    }
+  }
+};
+
+/* =========================================================
+   VIEW SWITCHING
+   ========================================================= */
+var viewHome=document.getElementById('view-home');
+var viewCategory=document.getElementById('view-category');
+var viewTool=document.getElementById('view-tool');
+
+function animateIn(el){
+  el.classList.remove('view-anim');
+  void el.offsetWidth;
+  el.classList.add('view-anim');
+}
+
+function showHome(){
+  viewHome.classList.remove('hidden');
+  viewCategory.classList.add('hidden');
+  viewTool.classList.add('hidden');
+  animateIn(viewHome);
+  window.scrollTo(0,0);
+}
+function showCategory(catId){
+  var cat=categories[catId];
+  document.getElementById('catViewIcon').textContent=cat.icon;
+  document.getElementById('catViewName').textContent=cat.name;
+  document.getElementById('catViewDesc').textContent=cat.desc;
+  var grid=document.getElementById('toolGrid');
+  grid.innerHTML='';
+  cat.tools.forEach(function(toolId){
+    var t=tools[toolId];
+    var card=document.createElement('div');
+    card.className='tool-card glass'+(t.status==='soon' ? ' soon' : '');
+    card.innerHTML = '<span class="name">'+t.title+'</span>' + (t.status==='soon' ? '<span class="soon-tag">Coming soon</span>' : '<span class="arrow">→</span>');
+    if(t.status!=='soon'){ card.addEventListener('click', function(){ showTool(toolId); }); }
+    grid.appendChild(card);
+  });
+  viewHome.classList.add('hidden');
+  viewCategory.classList.remove('hidden');
+  viewTool.classList.add('hidden');
+  animateIn(viewCategory);
+  window.scrollTo(0,0);
+}
+
+function buildBasicCalcHTML(){
+  return '' +
+    '<div class="calc-wrap">' +
+      '<div class="calc-display" id="calcDisplay">0</div>' +
+      '<div class="calc-grid">' +
+        '<button class="calc-btn util" data-calc="clear">AC</button>' +
+        '<button class="calc-btn util" data-calc="back">⌫</button>' +
+        '<button class="calc-btn util" data-calc="percent">%</button>' +
+        '<button class="calc-btn op" data-calc="/">÷</button>' +
+        '<button class="calc-btn" data-calc="7">7</button>' +
+        '<button class="calc-btn" data-calc="8">8</button>' +
+        '<button class="calc-btn" data-calc="9">9</button>' +
+        '<button class="calc-btn op" data-calc="*">×</button>' +
+        '<button class="calc-btn" data-calc="4">4</button>' +
+        '<button class="calc-btn" data-calc="5">5</button>' +
+        '<button class="calc-btn" data-calc="6">6</button>' +
+        '<button class="calc-btn op" data-calc="-">−</button>' +
+        '<button class="calc-btn" data-calc="1">1</button>' +
+        '<button class="calc-btn" data-calc="2">2</button>' +
+        '<button class="calc-btn" data-calc="3">3</button>' +
+        '<button class="calc-btn op" data-calc="+">+</button>' +
+        '<button class="calc-btn zero" data-calc="0">0</button>' +
+        '<button class="calc-btn" data-calc=".">.</button>' +
+        '<button class="calc-btn equals" data-calc="equals">=</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function safeEval(expr){
+  if(!/^[0-9+\-*/.% ]+$/.test(expr)) return 'Error';
+  try{
+    var result = Function('"use strict";return ('+expr+')')();
+    if(typeof result !== 'number' || !isFinite(result)) return 'Error';
+    return Math.round(result*100000)/100000;
+  }catch(e){ return 'Error'; }
+}
+
+function attachBasicCalcHandlers(){
+  var expr='';
+  var display=document.getElementById('calcDisplay');
+  function updateDisplay(){ display.textContent = expr===''? '0': expr; }
+  document.querySelectorAll('#toolForm [data-calc]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var action=btn.dataset.calc;
+      if(action==='clear'){ expr=''; }
+      else if(action==='back'){ expr=expr.slice(0,-1); }
+      else if(action==='percent'){ expr+='/100'; }
+      else if(action==='equals'){
+        var val=safeEval(expr);
+        if(val==='Error'){ display.textContent='Error'; expr=''; setTimeout(updateDisplay,700); return; }
+        expr=String(val);
+      } else { expr+=action; }
+      updateDisplay();
+      display.classList.remove('pop'); void display.offsetWidth; display.classList.add('pop');
+    });
+  });
+  updateDisplay();
+}
+
+function showTool(toolId){
+  var t=tools[toolId];
+  document.getElementById('toolTitle').textContent=t.title;
+  document.getElementById('toolDesc').textContent=t.desc;
+  var backBtn=document.getElementById('backToCatFromTool');
+  backBtn.textContent=categories[t.category].name;
+  backBtn.onclick=function(){ showCategory(t.category); };
+
+  var panel=document.getElementById('toolPanel');
+  var form=document.getElementById('toolForm');
+  form.innerHTML='';
+
+  if(t.custom==='basiccalc'){
+    panel.classList.add('calc-mode');
+    form.innerHTML=buildBasicCalcHTML();
+    attachBasicCalcHandlers();
+  } else {
+    panel.classList.remove('calc-mode');
+    t.fields.forEach(function(f){
+      var wrap=document.createElement('div');
+      wrap.className='field';
+      var label=document.createElement('label');
+      label.textContent=f.label;
+      label.setAttribute('for','f_'+f.key);
+      wrap.appendChild(label);
+      var input;
+      if(f.type==='select'){
+        input=document.createElement('select');
+        f.options.forEach(function(opt){
+          var o=document.createElement('option');
+          o.value=opt[0]; o.textContent=opt[1];
+          input.appendChild(o);
+        });
+      } else if(f.type==='textarea'){
+        input=document.createElement('textarea');
+        if(f.placeholder) input.placeholder=f.placeholder;
+      } else {
+        input=document.createElement('input');
+        input.type=f.type;
+        if(f.placeholder) input.placeholder=f.placeholder;
+        if(f.step) input.step=f.step;
+      }
+      input.id='f_'+f.key;
+      input.dataset.key=f.key;
+      input.addEventListener('input', function(){
+        if(f.autofillTarget && f.autofillMap[input.value]!==undefined){
+          var targetEl=document.getElementById('f_'+f.autofillTarget);
+          if(targetEl) targetEl.value=f.autofillMap[input.value];
+        }
+        recalc(toolId);
+      });
+      wrap.appendChild(input);
+      form.appendChild(wrap);
+    });
+    document.getElementById('toolResult').innerHTML='<div class="result-empty">Values daalo, result yahan turant dikhega.</div>';
+    recalc(toolId);
+  }
+
+  viewHome.classList.add('hidden');
+  viewCategory.classList.add('hidden');
+  viewTool.classList.remove('hidden');
+  animateIn(viewTool);
+  window.scrollTo(0,0);
+}
+
+function recalc(toolId){
+  var t=tools[toolId];
+  var values={};
+  t.fields.forEach(function(f){
+    var el=document.getElementById('f_'+f.key);
+    var raw=el.value;
+    values[f.key] = (f.type==='number') ? parseFloat(raw) : raw;
+  });
+  var out=t.compute(values);
+  var resultEl=document.getElementById('toolResult');
+  if(!out){
+    resultEl.innerHTML='<div class="result-empty">Values daalo, result yahan turant dikhega.</div>';
+    return;
+  }
+  var html='<div class="result-headline pop"><div class="label">'+out.headline.label+'</div><div class="value tnum">'+out.headline.value+'</div></div>';
+  if(out.lines && out.lines.length){
+    html+='<div class="result-lines">';
+    out.lines.forEach(function(l){ html+='<div class="result-line"><span>'+l.label+'</span><b class="tnum">'+l.value+'</b></div>'; });
+    html+='</div>';
+  }
+  if(out.note){ html+='<div class="result-note">'+out.note+'</div>'; }
+  resultEl.innerHTML=html;
+}
+
+/* =========================================================
+   BUILD HOME CATEGORY GRID
+   ========================================================= */
+var catGrid=document.getElementById('catGrid');
+Object.keys(categories).forEach(function(catId){
+  var cat=categories[catId];
+  var liveCount=cat.tools.filter(function(id){ return tools[id].status==='live'; }).length;
+  var card=document.createElement('button');
+  card.className='cat-card glass';
+  card.innerHTML='<span class="icon-badge">'+cat.icon+'</span><span class="name disp">'+cat.name+'</span><span class="count">'+liveCount+' calculators</span>';
+  card.addEventListener('click', function(){ showCategory(catId); });
+  catGrid.appendChild(card);
+});
+
+/* =========================================================
+   NAV
+   ========================================================= */
+document.getElementById('logoBtn').addEventListener('click', showHome);
+document.getElementById('backToHomeFromCat').addEventListener('click', showHome);
+document.getElementById('backToHomeFromTool').addEventListener('click', showHome);
+
+/* =========================================================
+   TOOL SEARCH (reliable — matches tool names, always finds something real)
+   ========================================================= */
+var searchIndex = Object.keys(tools).filter(function(id){ return tools[id].status==='live'; })
+  .map(function(id){ return { id:id, title:tools[id].title, category:tools[id].category }; });
+var popularToolIds = ["emi","ytmoney","bmi","basiccalc","percentage","age","gst","tip"];
+
+function renderSearchResults(query){
+  var resultsEl=document.getElementById('searchResults');
+  var captionEl=document.getElementById('searchCaption');
+  resultsEl.innerHTML='';
+  var list;
+  if(!query){
+    captionEl.textContent='Popular:';
+    list = popularToolIds.map(function(id){ return searchIndex.find(function(t){ return t.id===id; }); }).filter(Boolean);
+  } else {
+    var q=query.toLowerCase();
+    list = searchIndex.filter(function(t){ return t.title.toLowerCase().indexOf(q)!==-1; });
+    captionEl.textContent = list.length ? 'Results:' : '';
+  }
+  if(list.length===0){
+    resultsEl.innerHTML='<div class="quickask-hint" style="margin-top:0;">Kuch match nahi mila — neeche categories se dekh lo.</div>';
+    return;
+  }
+  list.slice(0,8).forEach(function(t){
+    var chip=document.createElement('button');
+    chip.className='search-chip';
+    chip.textContent=t.title;
+    chip.addEventListener('click', function(){ showTool(t.id); });
+    resultsEl.appendChild(chip);
+  });
+}
+document.getElementById('toolSearchInput').addEventListener('input', function(){ renderSearchResults(this.value.trim()); });
+renderSearchResults('');
+
+showHome();
+</script>
+
+</body>
+</html>
